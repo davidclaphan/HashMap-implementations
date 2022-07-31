@@ -93,7 +93,7 @@ class HashMap:
         TODO: Write this implementation
         """
         # identify bucket to insert key/value pair
-        bucket = (int(self._hash_function(key)) % int(self._capacity))
+        bucket = self._hash_function(key) % self._capacity
 
         # need to consider scenario with duplicate keys --> Overwrite values
         if self._buckets[bucket].contains(key) is not None:
@@ -167,25 +167,19 @@ class HashMap:
                 for _ in range(capacity - new_capacity):
                     self._buckets.pop()
 
+            # adjust data members of HashMap
             self._capacity = new_capacity
             self._size = 0
 
-            # rehash values
+            # rehash values using table variable from above
             for pairs in range(table.length()):
                 self.put(table[pairs][0], table[pairs][1])
-
-
-
-
-
-
-
 
     def get(self, key: str) -> object:
         """
         TODO: Write this implementation
         """
-        bucket = (int(self._hash_function(key)) % int(self._capacity))
+        bucket = self._hash_function(key) % self._capacity
 
         if self._buckets[bucket].contains(key) is not None:
             return self._buckets[bucket].contains(key).value
@@ -196,7 +190,7 @@ class HashMap:
         """
         TODO: Write this implementation
         """
-        bucket = (int(self._hash_function(key)) % int(self._capacity))
+        bucket = self._hash_function(key) % self._capacity
 
         if self._buckets[bucket].contains(key) is not None:
             return True
@@ -207,7 +201,7 @@ class HashMap:
         """
         TODO: Write this implementation
         """
-        bucket = (int(self._hash_function(key)) % int(self._capacity))
+        bucket = self._hash_function(key) % self._capacity
 
         if self._buckets[bucket].contains(key) is not None:
             self._buckets[bucket].remove(key)
@@ -233,6 +227,7 @@ class HashMap:
 
         return key_val
 
+
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """
     TODO: Write this implementation
@@ -240,7 +235,32 @@ def find_mode(da: DynamicArray) -> (DynamicArray, int):
     # if you'd like to use a hash map,
     # use this instance of your Separate Chaining HashMap
     map = HashMap()
+    mode = 1
+    mode_arr = DynamicArray()
+    element_val = 1
 
+    for ele in range(da.length()):
+
+        # identify if value already in HashMap
+        if map.get(da[ele]) is not None:
+
+            element_val = map.get(da[ele]) + 1
+
+            if element_val == mode:
+                mode_arr.append(da[ele])
+
+            elif element_val > mode:
+                mode_arr = DynamicArray()
+                mode_arr.append(da[ele])
+                mode = element_val
+
+        map.put(da[ele], element_val)
+        element_val = 1
+
+    if mode == 1:
+        mode_arr = da
+
+    return mode_arr, mode
 
 # ------------------- BASIC TESTING ---------------------------------------- #
 

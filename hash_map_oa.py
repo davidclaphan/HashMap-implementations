@@ -186,7 +186,7 @@ class HashMap:
         TODO: Write this implementation
         """
         for ele in range(self._capacity):
-            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+            if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 self._buckets[ele].is_tombstone = True
                 self._size -= 1
 

@@ -133,6 +133,11 @@ class HashMap:
 
         :return: No return value
         """
+
+        for list in range(self._capacity):
+            if self._buckets[list].length() > 0:
+                self._buckets[list] = LinkedList()
+
         self._size = 0
 
     def resize_table(self, new_capacity: int) -> None:
@@ -163,7 +168,7 @@ class HashMap:
                     self._buckets.pop()
 
             self._capacity = new_capacity
-            self._size - 0
+            self._size = 0
 
             # rehash values
             for pairs in range(table.length()):
@@ -206,6 +211,7 @@ class HashMap:
 
         if self._buckets[bucket].contains(key) is not None:
             self._buckets[bucket].remove(key)
+            self._size -= 1
 
     def get_keys_and_values(self) -> DynamicArray:
         """

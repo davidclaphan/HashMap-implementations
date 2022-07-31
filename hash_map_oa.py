@@ -92,56 +92,126 @@ class HashMap:
         """
         # remember, if the load factor is greater than or equal to 0.5,
         # resize the table before putting the new key/value pair
-        pass
+        if self.table_load() >= 0.5:
+            self.resize_table(self._capacity*2)
+
+        quad_probe = 1
+        bucket = self._hash_function(key) % self._capacity
+        while self._buckets[bucket] is not None and self._buckets[bucket].key != key and self._buckets[bucket].is_tombstone is False:
+            bucket = (self._hash_function(key) + (quad_probe**2)) % self._capacity
+            quad_probe += 1
+
+        # if while loop stops because of empty value, insert key:value pair
+        if self._buckets[bucket] is None or self._buckets[bucket].is_tombstone is True:
+            self._buckets[bucket] = HashEntry(key, value)
+            self._size += 1
+
+        else:
+            self._buckets[bucket].value = value
 
     def table_load(self) -> float:
         """
-        TODO: Write this implementation
+        Calculates and returns the load factor of a HashMap. Table load is the number of elements divided by
+        the number of buckets.
+
+        :param: None
+
+        :return: a float value representing the table load
         """
-        pass
+        return self._size / self._capacity
 
     def empty_buckets(self) -> int:
         """
         TODO: Write this implementation
         """
-        pass
+        empty_buckets = 0
+
+        for bucket in range(self._capacity):
+            if self._buckets[bucket] is None:
+                empty_buckets += 1
+
+        return empty_buckets
 
     def resize_table(self, new_capacity: int) -> None:
         """
         TODO: Write this implementation
         """
+
+        if new_capacity >= self._size:
         # remember to rehash non-deleted entries into new table
-        pass
+
+            # copy existing key/values and clear array
+            current_map = self.get_keys_and_values()
+            capacity = self._capacity
+            self.clear()
+
+            # set capacity of new array
+            if self._is_prime(new_capacity) is True:
+                self._capacity = new_capacity
+            else:
+                self._capacity = self._next_prime(new_capacity)
+
+            # determine if adding or removing buckets
+            if self._capacity > capacity:
+                for _ in range(capacity, self._capacity):
+                    self._buckets.append(None)
+            else:
+                for _ in range(capacity - self._capacity):
+                    self._buckets.pop()
+
+            # rehash existing elements
+            for pairs in range(current_map.length()):
+                self.put(current_map[pairs][0], current_map[pairs][1])
 
     def get(self, key: str) -> object:
         """
         TODO: Write this implementation
         """
-        pass
+        for ele in range(self._capacity):
+            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+                return self._buckets[ele].value
 
     def contains_key(self, key: str) -> bool:
         """
         TODO: Write this implementation
         """
-        pass
+        for ele in range(self._capacity):
+            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+                return True
+
+        return False
 
     def remove(self, key: str) -> None:
         """
         TODO: Write this implementation
         """
-        pass
+        for ele in range(self._capacity):
+            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+                self._buckets[ele].is_tombstone = True
+                self._buckets[ele].key = None
+                self._buckets[ele].value = None
+                self._size -= 1
 
     def clear(self) -> None:
         """
         TODO: Write this implementation
         """
-        pass
+        for ele in range(self._capacity):
+            if self._buckets[ele] is not None:
+                self._buckets[ele] = None
+        self._size = 0
 
     def get_keys_and_values(self) -> DynamicArray:
         """
         TODO: Write this implementation
         """
-        pass
+        key_val = DynamicArray()
+
+        for bucket in range(self._capacity):
+            if self._buckets[bucket] is not None and self._buckets[bucket].is_tombstone is False:
+                key_val.append((self._buckets[bucket].key, self._buckets[bucket].value))
+
+        return key_val
 
 
 # ------------------- BASIC TESTING ---------------------------------------- #

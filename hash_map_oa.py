@@ -188,8 +188,6 @@ class HashMap:
         for ele in range(self._capacity):
             if self._buckets[ele] is not None and self._buckets[ele].key == key:
                 self._buckets[ele].is_tombstone = True
-                self._buckets[ele].key = None
-                self._buckets[ele].value = None
                 self._size -= 1
 
     def clear(self) -> None:

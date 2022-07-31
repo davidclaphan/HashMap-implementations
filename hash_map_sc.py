@@ -139,7 +139,42 @@ class HashMap:
         """
         TODO: Write this implementation
         """
-        pass
+
+        # check if new capacity valid
+        if new_capacity >= 1:
+
+            # copy existing data to dynamic array
+            table = self.get_keys_and_values()
+            capacity = self._capacity
+
+            # remove all values from HashMap
+            self.clear()
+
+            # calculate new capacity (must be prime)
+            if self._is_prime(new_capacity) is False:
+                new_capacity = self._next_prime(new_capacity)
+
+            # determine if adding or removing buckets
+            if new_capacity > capacity:
+                for _ in range(capacity, new_capacity):
+                    self._buckets.append(LinkedList())
+            else:
+                for _ in range(capacity - new_capacity):
+                    self._buckets.pop()
+
+            self._capacity = new_capacity
+            self._size - 0
+
+            # rehash values
+            for pairs in range(table.length()):
+                self.put(table[pairs][0], table[pairs][1])
+
+
+
+
+
+
+
 
     def get(self, key: str) -> object:
         """
@@ -167,14 +202,30 @@ class HashMap:
         """
         TODO: Write this implementation
         """
-        pass
+        bucket = (int(self._hash_function(key)) % int(self._capacity))
+
+        if self._buckets[bucket].contains(key) is not None:
+            self._buckets[bucket].remove(key)
 
     def get_keys_and_values(self) -> DynamicArray:
         """
         TODO: Write this implementation
         """
-        pass
+        key_val = DynamicArray()
 
+        for val in range(self._capacity):
+            if self._buckets[val].length() > 0:
+                bucket_iter = iter(self._buckets[val])
+                for node in range(self._buckets[val].length()):
+                    try:
+                        current_key = bucket_iter.__next__().key
+                        value = self._buckets[val].contains(current_key).value
+                        key_val.append((current_key, value))
+
+                    except StopIteration:
+                        pass
+
+        return key_val
 
 def find_mode(da: DynamicArray) -> (DynamicArray, int):
     """

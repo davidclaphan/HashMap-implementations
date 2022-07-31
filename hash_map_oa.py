@@ -168,7 +168,7 @@ class HashMap:
         TODO: Write this implementation
         """
         for ele in range(self._capacity):
-            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+            if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 return self._buckets[ele].value
 
     def contains_key(self, key: str) -> bool:
@@ -176,7 +176,7 @@ class HashMap:
         TODO: Write this implementation
         """
         for ele in range(self._capacity):
-            if self._buckets[ele] is not None and self._buckets[ele].key == key:
+            if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 return True
 
         return False

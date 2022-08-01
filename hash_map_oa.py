@@ -3,7 +3,10 @@
 # Course: CS261 - Data Structures
 # Assignment: 6 - HashMap Implementation
 # Due Date: 08/09/2022
-# Description:
+# Description: This file contains a HashMap implementation using a Dynamic Array for storing key:value pairs, and
+#               uses Open Addressing and Quadratic Probing for collision resolution. The HashMap class contains
+#               methods to add/remove key:value pairs to/from the table, as well as additional methods to
+#               search for values in the table.
 
 
 from a6_include import (DynamicArray, HashEntry,
@@ -88,31 +91,42 @@ class HashMap:
 
     def put(self, key: str, value: object) -> None:
         """
-        TODO: Write this implementation
+        Updates key/value pairs in a HashMap table. If the key does not exist in the table, it is added with the
+        associated value. If the key already exists in the table, the value for the key is updated. If the table load
+        size is greater or equal to 0.5, this method first calls resize_table().
+
+        :param key: the key to place or update in the table
+        :param value: the value associated with they key being added or updated in the table
+
+        :return: no return value
         """
-        # remember, if the load factor is greater than or equal to 0.5,
-        # resize the table before putting the new key/value pair
+        # if the load factor is greater than or equal to 0.5, resize the table before putting the new key/value pair
         if self.table_load() >= 0.5:
             self.resize_table(self._capacity*2)
 
+        # determine bucket to insert key/value pair, if bucket is not empty, use quadratic probing to determine the
+        #   next bucket to attempt to insert
         quad_probe = 1
         bucket = self._hash_function(key) % self._capacity
         while self._buckets[bucket] is not None and self._buckets[bucket].key != key and self._buckets[bucket].is_tombstone is False:
             bucket = (self._hash_function(key) + (quad_probe**2)) % self._capacity
             quad_probe += 1
 
-        # if while loop stops because of empty value, insert key:value pair
+        # if the above loop stops because of it found an empty bucket or "empty" bucket
+        #   with a tombstone, insert key:value pair
         if self._buckets[bucket] is None or self._buckets[bucket].is_tombstone is True:
             self._buckets[bucket] = HashEntry(key, value)
             self._size += 1
 
+        # if the loop stops because it found the key already exists in the table, update the value associated
+        #   with that key
         else:
             self._buckets[bucket].value = value
 
     def table_load(self) -> float:
         """
         Calculates and returns the load factor of a HashMap. Table load is the number of elements divided by
-        the number of buckets.
+        the number of buckets (capacity).
 
         :param: None
 
@@ -122,59 +136,89 @@ class HashMap:
 
     def empty_buckets(self) -> int:
         """
-        TODO: Write this implementation
+        Determines the number of empty buckets in a HashMap and returns that value.
+
+        :param: None
+
+        :return: an integer representing the number of empty buckets in the HashMap
         """
+        # initialize bucket counting variable
         empty_buckets = 0
 
+        # check each bucket (index) in the table, if the index at a bucket is None, that bucket is empty
         for bucket in range(self._capacity):
             if self._buckets[bucket] is None:
                 empty_buckets += 1
 
+        # return the bucket counter after checking all buckets
         return empty_buckets
 
     def resize_table(self, new_capacity: int) -> None:
         """
-        TODO: Write this implementation
+        Updates the capacity of the HashMap and re-maps existing values in the HashMap after resizing. The new
+        capacity can be larger or smaller than the current capacity, as long as there is space available for
+        all elements. This method is called in put() automatically when the load factor of the HashMap is greater
+        or equal to 0.5.
+
+        Capacity must be a prime number, if the provided value is not prime, capacity will be adjusted
+        to the closest prime number larger than the provided value.
+
+        :param new_capacity: the desired capacity for the HashMap
+
+        :return: no return value
         """
-
+        # only resize if the desired capacity is large enough to fit all existing values
         if new_capacity >= self._size:
-        # remember to rehash non-deleted entries into new table
 
-            # copy existing key/values and clear array
+            # copy existing key/value pairs to an array and the capacity before adjustment to a variable
             current_map = self.get_keys_and_values()
             capacity = self._capacity
+
+            # remove all values from HashMap
             self.clear()
 
-            # set capacity of new array
+            # calculate new capacity (must be prime)
             if self._is_prime(new_capacity) is True:
                 self._capacity = new_capacity
             else:
                 self._capacity = self._next_prime(new_capacity)
 
-            # determine if adding or removing buckets
+            # determine if adjustment is adding or removing buckets
             if self._capacity > capacity:
                 for _ in range(capacity, self._capacity):
-                    self._buckets.append(None)
+                    self._buckets.append(None)              # add empty buckets if increasing capacity
             else:
                 for _ in range(capacity - self._capacity):
-                    self._buckets.pop()
+                    self._buckets.pop()                     # remove buckets if decreasing capacity
 
-            # rehash existing elements
+            # rehash values that were copied to the current_map variable, using the new capacity
             for pairs in range(current_map.length()):
                 self.put(current_map[pairs][0], current_map[pairs][1])
 
     def get(self, key: str) -> object:
         """
-        TODO: Write this implementation
+        Returns the value associated with the provided key in the HashMap.
+
+        :param key: the key of the value that will be returned
+
+        :return: the value object associated with the provided key, returns None if the key is not found
         """
+        # iterate through each bucket (index) searching for a matching key, key must be in a bucket that is not a
+        #   tombstone placeholder value
         for ele in range(self._capacity):
             if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 return self._buckets[ele].value
 
     def contains_key(self, key: str) -> bool:
         """
-        TODO: Write this implementation
+        Determines if the provided key exists in the HashMap.
+
+        :param key: the key to look for in the HashMap
+
+        :return: True if the key exists, False if it does not exist
         """
+        # iterate through each bucket (index) searching for a matching key, key must be in a bucket that is not a
+        #   tombstone placeholder value
         for ele in range(self._capacity):
             if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 return True
@@ -183,8 +227,16 @@ class HashMap:
 
     def remove(self, key: str) -> None:
         """
-        TODO: Write this implementation
+        Removes a key/value pair from the HashMap based on the provided key by changing the _is_tombstone data
+        member of the HashEntry.
+
+        :param key: the key of the key/value pair to remove from the HashMap
+
+        :return: no return value
         """
+        # iterate through each bucket (index) searching for a matching key, key must be in a bucket that is not already
+        #   a tombstone placeholder value
+        # if found the HashEntry tombstone data member is updated to True, effectively removing it from the table
         for ele in range(self._capacity):
             if self._buckets[ele] is not None and self._buckets[ele].key == key and self._buckets[ele].is_tombstone is False:
                 self._buckets[ele].is_tombstone = True
@@ -192,19 +244,33 @@ class HashMap:
 
     def clear(self) -> None:
         """
-        TODO: Write this implementation
+        Clears the contents of a HashMap object. The underlying capacity of the table is not adjusted.
+
+        :param: None
+
+        :return: no return value
         """
+        # check each bucket in the table, if a bucket has any value other than None, update its value to None
         for ele in range(self._capacity):
             if self._buckets[ele] is not None:
                 self._buckets[ele] = None
+
+        # all values in the table have been removed, update size to 0
         self._size = 0
 
     def get_keys_and_values(self) -> DynamicArray:
         """
-        TODO: Write this implementation
+        Puts all the key/value pairs of a HashMap into a Dynamic Array as a tuple, one tuple for each key/value pair.
+
+        :param: None
+
+        :return: a Dynamic Array containing tuples of the key/value pairs from the HashMap
         """
+        # create a dynamic array to place key/value pairs into
         key_val = DynamicArray()
 
+        # check each index for a value that is not None or a tombstone, if found place the key/value pair as a
+        #   tuple into the key_val array
         for bucket in range(self._capacity):
             if self._buckets[bucket] is not None and self._buckets[bucket].is_tombstone is False:
                 key_val.append((self._buckets[bucket].key, self._buckets[bucket].value))

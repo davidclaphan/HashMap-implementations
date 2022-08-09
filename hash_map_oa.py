@@ -142,17 +142,7 @@ class HashMap:
 
         :return: an integer representing the number of empty buckets in the HashMap
         """
-        # initialize bucket counting variable
-        empty_buckets = 0
-
-        # check each bucket (index) in the table, if the index at a bucket is None or contains a tombstone
-        #   placeholder, that bucket is empty
-        for bucket in range(self._capacity):
-            if self._buckets[bucket] is None or self._buckets[bucket].is_tombstone is True:
-                empty_buckets += 1
-
-        # return the bucket counter after checking all buckets
-        return empty_buckets
+        return self._capacity - self._size
 
     def resize_table(self, new_capacity: int) -> None:
         """

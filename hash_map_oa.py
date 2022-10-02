@@ -268,7 +268,8 @@ class HashMap:
 
         return key_val
 
-
+# These tests were provided by the instructional staff to help with debugging and implementing the HashMap.
+# None of the below code was written by me.
 # ------------------- BASIC TESTING ---------------------------------------- #
 
 if __name__ == "__main__":
